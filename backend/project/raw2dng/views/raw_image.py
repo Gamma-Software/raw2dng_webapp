@@ -3,10 +3,12 @@ from rest_framework import viewsets
 
 from raw2dng.serializers.raw_image import RawImageSerializer
 from raw2dng.models.raw_image import RawImage
-
-# Create your views here.
-
 class RawImageView(viewsets.ModelViewSet):
     serializer_class = RawImageSerializer
-    queryset = RawImage.objects.all()
-    
+
+    def get_queryset(self):
+        user = self.request.GET.get('user')
+        queryset = RawImage.objects.all()
+        if user is not None:
+            queryset = queryset.filter(user=user)
+        return queryset

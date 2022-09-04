@@ -6,9 +6,14 @@ mimetypes.init()
 # Create your models here.
 
 class RawImage(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    user = models.CharField(max_length=120)
     name = models.CharField(max_length=120)
-    source = models.FileField()
-    completed = models.BooleanField(default=False)
+    source = models.FileField(blank=True)
+
+    def delete(self, *args, **kwargs):
+        self.source.delete()
+        super().delete(*args, **kwargs)
 
     def _str_(self):
         return self.name

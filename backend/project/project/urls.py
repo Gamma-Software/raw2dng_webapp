@@ -21,12 +21,13 @@ from rest_framework import routers
 from raw2dng.views.raw_image import RawImageView
 
 router = routers.DefaultRouter()
-router.register(r'rawimage', RawImageView, 'rawimage')
+router.register(r'raws', RawImageView, 'raws')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(router.urls)),
 ]
 
+# Show images
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
