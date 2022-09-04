@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-%in-@$45=ql@a1y_a&=n)^g82@epv1y$^(=dyyi+du(e@rg=im
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+CSRF_TRUSTED_ORIGINS = ['https://*.pival.fr','https://*.127.0.0.1','http://127.0.0.1', 'http://localhost', 'chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop']
 
 # Application definition
 

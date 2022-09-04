@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import routers
 from raw2dng.views.raw_image import RawImageView
+from raw2dng.views import convert
 
 router = routers.DefaultRouter()
 router.register(r'raws', RawImageView, 'raws')
@@ -26,6 +27,7 @@ router.register(r'raws', RawImageView, 'raws')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include(router.urls)),
+    path('api/v1/convert/<int:id>/', convert.convert, name='convert'),
 ]
 
 # Show images

@@ -11,6 +11,10 @@ class RawImage(models.Model):
     name = models.CharField(max_length=120)
     source = models.FileField(blank=True)
 
+    def save(self, *args, **kwargs):
+        print("save")
+        super().save(*args, **kwargs)
+
     def delete(self, *args, **kwargs):
         self.source.delete()
         super().delete(*args, **kwargs)
