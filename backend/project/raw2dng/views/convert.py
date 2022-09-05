@@ -17,6 +17,7 @@ from raw2dng.models.image import Image, ConvertedImage
 
 def background_convert(image):
     os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
+    # TODO continue after convert and with its output
     image.converted = True
     path = Path(image.source.path.replace('.ARW', '.dng'))
     with path.open(mode='rb') as f:
@@ -34,10 +35,11 @@ def convert(request, id):
         if image.converted:
             return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
         threading.Thread(target=background_convert, name="convert", args=[image]).start()
+        return JsonResponse({'message':'Image converting in DNG','success':'Converting in progress use command GET /api/v1/images/' + str(id) + '/convert to download the converted image when convertion finished'}, status=200)
     
     elif request.method == 'GET':
         if not image.converted:
             return JsonResponse({'message':'Image not converted','error':'Image not converted use command POST /api/v1/images/' + str(id) + '/convert to convert the image'}, status=404)
         return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.dng")
     
-    return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
+    return JsonResponse({'message':'Command not recognized','error':'The command is not recognized, POST /api/ to get more info'}, status=400)
