@@ -15,9 +15,7 @@ import os
 from raw2dng.serializers.image import ImageSerializer
 from raw2dng.models.image import Image, ConvertedImage
 
-def function_that_downloads(image):
-    #import subprocess
-    #subprocess.Popen(["docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.path, output_image_file=image.source.name.replace('.ARW', '.dng'))], shell=True)
+def background_convert(image):
     os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
     image.converted = True
     path = Path(image.source.path.replace('.ARW', '.dng'))
@@ -28,15 +26,18 @@ def function_that_downloads(image):
 
 @csrf_exempt
 def convert(request, id):
+    if not Image.objects.filter(pk=id).exists():
+        return JsonResponse({'message':'Converted image not found','error':'Image not found use command POST /api/v1/images/' + str(id) + ' to upload an image to convert'}, status=404)
+    
     image = Image.objects.get(pk=id)
     if request.method == 'POST':
         if image.converted:
             return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
-        threading.Thread(target=function_that_downloads, name="Downloader", args=[image]).start()
-    elif request.method == 'GET' and request:
-        print('download converted image if exists')
-        if image.converted:
-            return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.png")
-        else:
+        threading.Thread(target=background_convert, name="convert", args=[image]).start()
+    
+    elif request.method == 'GET':
+        if not image.converted:
             return JsonResponse({'message':'Image not converted','error':'Image not converted use command POST /api/v1/images/' + str(id) + '/convert to convert the image'}, status=404)
+        return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.dng")
+    
     return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)

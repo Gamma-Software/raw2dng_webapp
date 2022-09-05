@@ -53,7 +53,8 @@ class Image(models.Model):
 
     def delete(self, *args, **kwargs):
         self.source.delete()
-        self.converted_source.delete()
+        if self.converted:
+            self.converted_source.delete()
         super().delete(*args, **kwargs)
     
     def convert(self):
