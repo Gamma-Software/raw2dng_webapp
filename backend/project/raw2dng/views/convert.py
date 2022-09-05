@@ -15,16 +15,6 @@ import os
 from raw2dng.serializers.image import ImageSerializer
 from raw2dng.models.image import Image, ConvertedImage
 
-class ConvertView(viewsets.ModelViewSet):
-    serializer_class = ImageSerializer
-
-    def get_queryset(self):
-        user = self.request.GET.get('user')
-        queryset = Image.objects.all()
-        if user is not None:
-            queryset = queryset.filter(user=user)
-        return queryset
-
 def function_that_downloads(image):
     #import subprocess
     #subprocess.Popen(["docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.path, output_image_file=image.source.name.replace('.ARW', '.dng'))], shell=True)
@@ -43,7 +33,7 @@ def convert(request, id):
         if image.converted:
             return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
         threading.Thread(target=function_that_downloads, name="Downloader", args=[image]).start()
-    elif request.method == 'GET':
+    elif request.method == 'GET' and request:
         print('download converted image if exists')
         if image.converted:
             return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.png")
