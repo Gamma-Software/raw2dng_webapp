@@ -1,6 +1,7 @@
 from pathlib import Path
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import JsonResponse, HttpResponse, FileResponse, HttpResponseForbidden
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
@@ -27,6 +28,11 @@ def background_convert(image):
 
 @csrf_exempt
 def convert(request, id):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden("User not authenticated")
+
+    username = request.user.username
+    print(username)
     if not Image.objects.filter(pk=id).exists():
         return JsonResponse({'message':'Converted image not found','error':'Image not found use command POST /api/v1/images/' + str(id) + ' to upload an image to convert'}, status=404)
     

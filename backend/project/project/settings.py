@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta 
 from pathlib import Path
 import os
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'raw2dng',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +55,21 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',)
+}
+
+if DEBUG:
+    SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    }
+else:
+    SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+        'REFRESH_TOKEN_LIFETIME': timedelta(hours=2),
+    }
 
 CORS_ORIGIN_WHITELIST = [
      'http://localhost:3000'
@@ -132,4 +149,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = '/tmp/raw2dng'

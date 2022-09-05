@@ -18,6 +18,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from raw2dng.views.image import ImageView
 from raw2dng.views import convert
 from raw2dng.views import views
@@ -28,6 +29,9 @@ router.register(r'images', ImageView, 'images')
 urlpatterns = [
     path('api/', views.index, name='index'),
     path('admin/', admin.site.urls),
+    path('api/v1/api-auth/', include('rest_framework.urls')),
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/', include(router.urls)),
     path('api/v1/images/<int:id>/convert', convert.convert, name='convert'),
 ]
