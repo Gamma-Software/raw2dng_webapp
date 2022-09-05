@@ -1,6 +1,15 @@
-from django.shortcuts import render, HttpResponse
+from django.http import JsonResponse
 
 # Create your views here.
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    response = {
+        "commands": [{
+            "images": "GET /api/v1/images/",
+            "post one image": "POST /api/v1/images/",
+            "one image with id": "GET /api/v1/images/:id/",
+            "convert image": "POST /api/v1/images/:id/convert/",
+            "download converted image": "GET /api/v1/images/:id/convert/",
+        }]
+    }
+    return JsonResponse(response, status=200)
