@@ -1,10 +1,11 @@
 from pathlib import Path
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from rest_framework import viewsets
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.core.files import File
+import threading
 import mimetypes
 mimetypes.init()
 
@@ -25,9 +26,7 @@ class ConvertView(viewsets.ModelViewSet):
         return queryset
 
 def function_that_downloads(image):
-    import subprocess
-    print(image.source.path)
-    print(image.source.name.replace('.ARW', '.dng'))
+    #import subprocess
     #subprocess.Popen(["docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.path, output_image_file=image.source.name.replace('.ARW', '.dng'))], shell=True)
     os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
     image.converted = True
@@ -40,26 +39,14 @@ def function_that_downloads(image):
 @csrf_exempt
 def convert(request, id):
     image = Image.objects.get(pk=id)
-    if request.method == 'POST' and not image.converted:
-        import threading
-        convert_thread = threading.Thread(target=function_that_downloads, name="Downloader", args=[image])
-        convert_thread.start()
+    if request.method == 'POST':
+        if image.converted:
+            return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
+        threading.Thread(target=function_that_downloads, name="Downloader", args=[image]).start()
     elif request.method == 'GET':
         print('download converted image if exists')
-        if not image.converted:
-            return JsonResponse({'message':'error','explanation':'Image not converted'}, status=404)
+        if image.converted:
+            return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.png")
         else:
-            print(image.converted_source.url)
-            return redirect(image.converted_source.url)
-            filepath = MEDIA_ROOT + '/' + image.source.name.replace('.ARW', '.dng')
-            with open(filepath, 'r') as file:
-                # Set the mime type
-                mime_type, _ = mimetypes.guess_type(filepath)
-                # Set the return value of the HttpResponse
-                response = HttpResponse(file, content_type=mime_type)
-                # Set the HTTP header for sending to browser
-                response['Content-Disposition'] = "attachment; filename=%s" % image.source.name.replace('.ARW', '.dng')
-                # Return the response value
-                return response
-
-    return redirect('/api/v1/images/'+str(id))
+            return JsonResponse({'message':'Image not converted','error':'Image not converted use command POST /api/v1/images/' + str(id) + '/convert to convert the image'}, status=404)
+    return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
