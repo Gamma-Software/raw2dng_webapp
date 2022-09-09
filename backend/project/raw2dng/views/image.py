@@ -14,7 +14,6 @@ class ImageView(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         new_image = Image.objects.create(user=str(request.user), source=request.data["source"])
         new_image.save()
-        # return JsonResponse(serializers.serialize('json', [new_image]), safe = False)
         j = json.loads(serializers.serialize('json', [new_image]))
         id = j[0]['pk']
         result = [{"id": id}]

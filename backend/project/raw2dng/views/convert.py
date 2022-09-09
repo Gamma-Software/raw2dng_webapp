@@ -7,14 +7,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.core.files import File
 import threading
-import mimetypes
-mimetypes.init()
 
 from project.settings import MEDIA_ROOT
 import os
-
-from raw2dng.serializers.image import ImageSerializer
-from raw2dng.models.image import Image, ConvertedImage
 
 def background_convert(image):
     os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
