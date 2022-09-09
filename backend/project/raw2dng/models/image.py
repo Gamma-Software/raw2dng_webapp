@@ -41,13 +41,12 @@ class ConvertedImage(models.Model):
 
 class Image(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
-    user = models.CharField(max_length=120)
+    user = models.CharField(max_length=120, blank=True, auto_created=True)
     source = models.FileField()
     converted = models.BooleanField(blank=True, default=False)
     converted_source = models.FileField(blank=True)
 
     def save(self, *args, **kwargs):
-        print("save")
         #if self.is_valid(source)
         super().save(*args, **kwargs)
 
