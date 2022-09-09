@@ -18,20 +18,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import routers
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from raw2dng.views.image import ImageView
-from raw2dng.views import convert
-from raw2dng.views import views
+from raw2dng.views.register import MyObtainTokenPairView
+from rest_framework_simplejwt.views import TokenRefreshView
+from raw2dng.views import convert, views, image, register
 
 router = routers.DefaultRouter()
-router.register(r'images', ImageView, 'images')
+router.register(r'images', image.ImageView, 'images')
 
 urlpatterns = [
     path('api/', views.index, name='index'),
     path('admin/', admin.site.urls),
     path('api/v1/api-auth/', include('rest_framework.urls')),
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/login/', MyObtainTokenPairView.as_view(), name='auth_register'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/register/', register.RegisterView.as_view(), name='auth_register'),
     path('api/v1/', include(router.urls)),
     path('api/v1/images/<int:id>/convert', convert.convert, name='convert'),
 ]
