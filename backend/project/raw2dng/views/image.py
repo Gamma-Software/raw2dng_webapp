@@ -1,10 +1,8 @@
-from hashlib import new
 import json
-from django.shortcuts import render, redirect
 from django.core import serializers
 from rest_framework import viewsets
 from raw2dng.views.permission import IsUserAuthenticated
-from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse, HttpResponseNotFound, Http404
+from django.http import JsonResponse, HttpResponseNotFound, Http404
 
 from raw2dng.serializers.image import ImageSerializer
 from raw2dng.models.image import Image
@@ -23,16 +21,7 @@ class ImageView(viewsets.ModelViewSet):
         for key, value in j[0]['fields'].items():
             result[0][key] = value
         return JsonResponse(result, safe=False,  status=201)
- 
-    # def destroy(self, request, *args, **kwargs):
-    #     try:
-    #         instance = self.get_object()
-    #         self.perform_destroy(instance)
-    #     except Http404:
-    #         return  Http404("Not found")
-    #     id = json.loads(serializers.serialize('json', [self.get_object()]))[0]["pk"]
-    #     return JsonResponse({"message": "Image successfully deleted", "success": "Image "+ str(id) +" successfully deleted"},  status=201)
-        
+
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
