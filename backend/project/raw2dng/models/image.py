@@ -1,11 +1,8 @@
 from django.core.exceptions import ValidationError
-from distutils import extension
 from django.db import models
-import os
-import mimetypes
+from django.core.files.images import get_image_dimensions
 
 
-mimetypes.init()
 
 class Image(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
@@ -29,18 +26,3 @@ class Image(models.Model):
 
     def _str_(self):
         return self.name
-
-    def clean_fields(self, exclude=None):
-        super().clean_fields(exclude=exclude)
-        image = str(self.source)
-        mimestart = mimetypes.guess_type(image)[0]
-        ext = mimetypes.guess_extension(image)
-        print(ext)
-
-        if mimestart and ext:
-            mimestart = mimestart.split('/')[0]
-
-            if mimestart != 'image' and ext not in ['nef', 'arw']:
-                raise ValidationError(
-                    _('Draft entries may not have a publication date.')
-                )

@@ -12,6 +12,10 @@ class ImageView(viewsets.ModelViewSet):
     permission_classes = [IsUserAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        # image sanity checks
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         new_image = Image.objects.create(user=str(request.user), source=request.data["source"])
         new_image.save()
         j = json.loads(serializers.serialize('json', [new_image]))
