@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/v1/login/', MyObtainTokenPairView.as_view(), name='auth_register'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/register/', register.RegisterView.as_view(), name='auth_register'),
+    path('api/v1/register/<slug:username>/', register.RegisterView.as_view(), name='auth_register'),
     path('api/v1/', include(router.urls)),
     path('api/v1/images/<int:id>/convert', convert.convert, name='convert'),
     path('api/v1/images/convert', convert.convert_all, name='convert_all'),
