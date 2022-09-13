@@ -1,18 +1,15 @@
 from pathlib import Path
-from django.shortcuts import render, redirect
-from django.http import JsonResponse, HttpResponse, FileResponse, HttpResponseForbidden
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
+from django.http import JsonResponse, FileResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from django.db import models
 from django.core.files import File
 import threading
 import concurrent.futures
-from raw2dng.models.image import Image
+import os
 
 from project.settings import MEDIA_ROOT
-import os
+from raw2dng.models.image import Image
+
 
 def background_convert(image):
     os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
@@ -45,7 +42,7 @@ def convert(request, id):
             return JsonResponse({'message':'Image not converted','error':'Image not converted use command POST /api/v1/images/' + str(id) + '/convert to convert the image'}, status=404)
         return FileResponse(image.converted_source.open(), as_attachment=True, filename="output.dng")
     
-    return JsonResponse({'message':'Command not recognized','error':'The command is not recognized, POST /api/ to get more info'}, status=400)
+    return HttpResponseBadRequest("The command is not recognized, POST /api/ to get more info")
 
 @api_view(["POST"])
 def convert_all(request):
@@ -66,4 +63,4 @@ def convert_all(request):
         executor.shutdown(wait=False)
         return JsonResponse({'message':'Images converting in DNG','success':f'Converting {queryset} in progress use command GET /api/v1/images/' + str(id) + '/convert to download the converted image when convertion finished'}, status=200)
     
-    return JsonResponse({'message':'Command not recognized','error':'The command is not recognized, POST /api/ to get more info'}, status=400)
+    return HttpResponseBadRequest("The command is not recognized, POST /api/ to get more info")
