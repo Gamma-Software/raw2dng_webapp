@@ -28,7 +28,6 @@ router.register(r'images', image.ImageView, 'images')
 urlpatterns = [
     path('api/', views.index, name='index'),
     path('admin/', admin.site.urls),
-    path('api/v1/api-auth/', include('rest_framework.urls')),
     path('api/v1/login/', MyObtainTokenPairView.as_view(), name='auth_register'),
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/v1/register/', register.RegisterView.as_view(), name='auth_register'),
