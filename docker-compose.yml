@@ -5,26 +5,25 @@ services:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    restart: always
+    env_file: backend/.docker-env/database
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:3.0
   backend:
     image: raw2dng_api
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000
     restart: always
     volumes:
-      - media_data:/app/media
+      - media_data:/media
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - DOCKERIZE=true
-    # env_file: .env-docker
+    env_file: backend/.docker-env/backend
     depends_on:
       - db
+      - redis
 
 volumes:
   postgres_data:

@@ -161,3 +161,4 @@ cython_debug/
 
 backend/project/media
 *.sqlite3
+.docker-env/
