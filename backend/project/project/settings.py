@@ -24,8 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-%in-@$45=ql@a1y_a&=n)^g82@epv1y$^(=dyyi+du(e@rg=im'
 
+if os.environ.get('DOCKERIZE'):
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []
 CSRF_TRUSTED_ORIGINS = ['https://*.pival.fr','https://*.127.0.0.1','http://127.0.0.1', 'http://localhost', 'chrome-extension://fhbjgbiflinjbdggehcddcbncdddomop']
@@ -161,4 +165,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/tmp/raw2dng'
+MEDIA_ROOT = '/media/'

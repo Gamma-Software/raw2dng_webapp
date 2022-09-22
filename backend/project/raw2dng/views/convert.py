@@ -10,9 +10,12 @@ import os
 from project.settings import MEDIA_ROOT
 from raw2dng.models.image import Image
 
+import docker
+client = docker.from_env()
 
 def background_convert(image):
-    os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
+    # os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
+    client.containers.run("valentinrudloff/raw2dng", command="/process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng'), detach=True))
     # TODO continue after convert depending on its output
     image.converted = True
     path = Path(image.source.path.replace('.ARW', '.dng'))
