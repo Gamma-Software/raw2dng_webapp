@@ -6,21 +6,20 @@ from django.core.files import File
 import threading
 import concurrent.futures
 import os
-import docker
 import platform
 
 from project.settings import MEDIA_ROOT
 from raw2dng.models.image import Image
 
-def background_convert(docker_client, image):
-    # os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
-    docker_client.containers.run("valentinrudloff/raw2dng:"+platform.processor(), command="/process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng'), detach=True))
-    # TODO continue after convert depending on its output
-    image.converted = True
-    path = Path(image.source.path.replace('.ARW', '.dng'))
-    with path.open(mode='rb') as f:
-        image.converted_source = File(f, name=path.name)
-        image.save()
+def background_convert(image):
+    print("run docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path}".format(folder=MEDIA_ROOT, input_path=image.source.name))
+    result = os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path}".format(folder=MEDIA_ROOT, input_path=image.source.name))
+    if result == 0: # If the convertion went well
+        image.converted = True
+        path = Path(image.source.path.replace('.ARW', '.dng'))
+        with path.open(mode='rb') as f:
+            image.converted_source = File(f, name=path.name)
+            image.save()
 
 
 @csrf_exempt
@@ -34,10 +33,9 @@ def convert(request, id):
     
     image = Image.objects.get(pk=id)
     if request.method == 'POST':
-        docker_client = docker.from_env()
         if image.converted:
             return JsonResponse({'message':'Image already converted','error':'Image already converted use command GET /api/v1/images/' + str(id) + '/convert to download the converted image'}, status=400)
-        threading.Thread(target=background_convert, name="convert", args=[docker_client, image]).start()
+        threading.Thread(target=background_convert, name="convert", args=[image]).start()
         return JsonResponse({'message':'Image converting in DNG','success':'Converting in progress use command GET /api/v1/images/' + str(id) + '/convert to download the converted image when convertion finished'}, status=200)
     
     elif request.method == 'GET':
