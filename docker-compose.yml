@@ -20,7 +20,7 @@ services:
     # command: python manage.py runserver 0.0.0.0:8000
     restart: always
     volumes:
-      - media_data:/media
+      - /media:/media
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8000:8000"
@@ -31,4 +31,3 @@ services:
 
 volumes:
   postgres_data:
-  media_data:
