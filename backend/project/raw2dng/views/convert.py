@@ -6,19 +6,20 @@ from django.core.files import File
 import threading
 import concurrent.futures
 import os
+import platform
 
 from project.settings import MEDIA_ROOT
 from raw2dng.models.image import Image
 
-
 def background_convert(image):
-    os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path} -o {output_image_file}".format(folder=MEDIA_ROOT, input_path=image.source.name, output_image_file=image.source.name.replace('.ARW', '.dng')))
-    # TODO continue after convert depending on its output
-    image.converted = True
-    path = Path(image.source.path.replace('.ARW', '.dng'))
-    with path.open(mode='rb') as f:
-        image.converted_source = File(f, name=path.name)
-        image.save()
+    print("run docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path}".format(folder=MEDIA_ROOT, input_path=image.source.name))
+    result = os.system("docker run -v {folder}:/process valentinrudloff/raw2dng /process/{input_path}".format(folder=MEDIA_ROOT, input_path=image.source.name))
+    if result == 0: # If the convertion went well
+        image.converted = True
+        path = Path(image.source.path.replace('.ARW', '.dng'))
+        with path.open(mode='rb') as f:
+            image.converted_source = File(f, name=path.name)
+            image.save()
 
 
 @csrf_exempt
